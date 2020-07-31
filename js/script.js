@@ -298,48 +298,65 @@ window.addEventListener("DOMContentLoaded", () => {
 				sliderPrev= document.querySelector(".offer__slider-prev"),
 				sliderNext = document.querySelector(".offer__slider-next"),
 				sliderCurrentNum = document.querySelector("#current"),
-				sliderTotalNum = document.querySelector("#total");
+				sliderTotalNum = document.querySelector("#total"),
+				sliderInner = document.querySelector(".offer__slider-inner"),
+				sliderWrap = document.querySelector(".offer__slider-wrapper"),
+				widthSliderWindow = window.getComputedStyle(sliderWrap).width;
 
-	let sliderIndex = 1;
-
-	function showSlider(n){
-		
-		if (n > sliderItems.length){
-			sliderIndex = 1;
-		}
-
-		if (n < 1){
-			sliderIndex = sliderItems.length;
-		}
-
-		sliderItems.forEach(item => item.style.display = "none");
-		sliderItems[sliderIndex - 1].style.display = "block";
-
-		if (sliderIndex < 10){
-			sliderCurrentNum.textContent = `0${sliderIndex}`;	
-		} else{
-			sliderCurrentNum.textContent = sliderIndex;
-		}		
-	}
-
-	function changeIndex(n){
-		showSlider(sliderIndex += n);
-	}
+	let sliderIndex = 1,
+			offset = 0;
 
 	if (sliderItems.length < 10){
 		sliderTotalNum.textContent = `0${sliderItems.length}`;	
 	} else{
 		sliderTotalNum.textContent = sliderItems.length;
 	}
-	
-	showSlider(sliderIndex);
+
+	if (sliderIndex < 10){
+		sliderCurrentNum.textContent = `0${sliderIndex}`;	
+	} else{
+		sliderCurrentNum.textContent = sliderIndex;
+	}
+
+	sliderInner.style.width = 100 * sliderItems.length + "%";
+	sliderInner.style.display = "flex";
+	sliderInner.style.transition = "1s all";
+	sliderWrap.style.overflow = "hidden";
 
 	sliderNext.addEventListener("click", () => {
-		changeIndex(1);
+		if (offset == +widthSliderWindow.slice(0, widthSliderWindow.length - 2) * (sliderItems.length - 1)){
+			offset = 0;
+			sliderIndex = 1;
+		} else{
+			offset += +widthSliderWindow.slice(0, widthSliderWindow.length - 2);
+			sliderIndex++;
+		}
+
+		sliderInner.style.transform = `translateX(-${offset}px)`;
+
+		if (sliderIndex < 10){
+			sliderCurrentNum.textContent = `0${sliderIndex}`;	
+		} else{
+			sliderCurrentNum.textContent = sliderIndex;
+		}
 	});
 
 	sliderPrev.addEventListener("click", () => {
-		changeIndex(-1);
+		if (offset == 0){
+			offset = +widthSliderWindow.slice(0, widthSliderWindow.length - 2) * (sliderItems.length - 1);
+			sliderIndex = sliderItems.length;
+		} else{
+			offset -= +widthSliderWindow.slice(0, widthSliderWindow.length - 2);
+			sliderIndex--;
+		}
+
+		sliderInner.style.transform = `translateX(-${offset}px)`;
+
+		if (sliderIndex < 10){
+			sliderCurrentNum.textContent = `0${sliderIndex}`;	
+		} else{
+			sliderCurrentNum.textContent = sliderIndex;
+		}
 	});
 
 });
