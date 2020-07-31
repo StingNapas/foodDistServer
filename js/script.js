@@ -192,104 +192,154 @@ window.addEventListener("DOMContentLoaded", () => {
 
 // Forms POST
 
-		let forms = document.querySelectorAll("form");
+	let forms = document.querySelectorAll("form");
 
-		const textMessage = {
-			ok: "Всё ок",
-			loading: "icons/spinner.svg",
-			fail: "Трабл"
-		};
+	const textMessage = {
+		ok: "Всё ок",
+		loading: "icons/spinner.svg",
+		fail: "Трабл"
+	};
 
-		forms.forEach(item => {
-			bindPostData(item);
+	forms.forEach(item => {
+		bindPostData(item);
+	});
+
+	const postData = async (url, data) =>{
+		let res = await fetch(url, {
+				method: "POST",
+				headers: {
+					'Content-type': 'application/json'
+				},
+				body: data
 		});
 
-		const postData = async (url, data) =>{
-			let res = await fetch(url, {
-					method: "POST",
-					headers: {
-						'Content-type': 'application/json'
-					},
-					body: data
-			});
+		return await res.json();
+	};
 
-			return await res.json();
-		};
+	const getResource = async (url) => {
+		let res = await fetch(url);
 
-		const getResource = async (url) => {
-			let res = await fetch(url);
+		if (!res.ok){
+			throw new Error(`Error status ${res.status}, status ${res.statusText}`);
+		}			
 
-			if (!res.ok){
-				throw new Error(`Error status ${res.status}, status ${res.statusText}`);
-			}			
+		return await res.json();
+	};
 
-			return await res.json();
-		};
-
-		getResource("http://localhost:3000/menu")
-		.then(data => {
-			data.forEach(({img, altimg, title, descr, price}) => {
-				new MenuCard(img, altimg, title, descr, price, ".menu__field .container").createCard();
-			});
+	getResource("http://localhost:3000/menu")
+	.then(data => {
+		data.forEach(({img, altimg, title, descr, price}) => {
+			new MenuCard(img, altimg, title, descr, price, ".menu__field .container").createCard();
 		});
+	});
 
-		function bindPostData(form){
-			form.addEventListener("submit", (e) => {
-				e.preventDefault();
+	function bindPostData(form){
+		form.addEventListener("submit", (e) => {
+			e.preventDefault();
 
-				let statusMessage = document.createElement("img");
-				statusMessage.src = textMessage.loading;
-				statusMessage.style.cssText = `
-					display: block;
-					margin: 0 auto;
-				`;
-				form.insertAdjacentElement("afterend", statusMessage);
-
-				let formData = new FormData(form);
-				// let obj = {};
-				// formData.forEach((value, key) => {
-				// 	obj[key] = value;
-				// });
-				// JSON.stringify(obj)
-
-				let json = JSON.stringify(Object.fromEntries(formData.entries()));
-
-				postData("http://localhost:3000/requests", json)
-				.then(data => {
-					console.log(data);
-					showModalThanks(textMessage.ok);
-					statusMessage.remove();
-				}).catch(() => {
-					showModalThanks(textMessage.fail);
-				}).finally(() => {
-					form.reset();
-				});
-			});
-		}
-
-		function showModalThanks(message){
-			let modalDialog = document.querySelector(".modal__dialog");
-			modalDialog.classList.add("hide");
-			modalDialog.classList.remove("show");
-
-			openModal();
-
-			let modalThanks = document.createElement("div");
-			modalThanks.classList.add("modal__dialog");
-			modalThanks.innerHTML = `
-				<div class="modal__content">
-					<div data-close class="modal__close">×</div>
-					<div class="modal__title">${message}</div>
-				</div>
+			let statusMessage = document.createElement("img");
+			statusMessage.src = textMessage.loading;
+			statusMessage.style.cssText = `
+				display: block;
+				margin: 0 auto;
 			`;
-			modalWindowContent.append(modalThanks);
+			form.insertAdjacentElement("afterend", statusMessage);
 
-			setTimeout(() => {
-				modalDialog.classList.add("show");
-				modalDialog.classList.remove("hide");
-				modalThanks.remove();
-				closeModal();
-			}, 5000);
+			let formData = new FormData(form);
+			// let obj = {};
+			// formData.forEach((value, key) => {
+			// 	obj[key] = value;
+			// });
+			// JSON.stringify(obj)
+
+			let json = JSON.stringify(Object.fromEntries(formData.entries()));
+
+			postData("http://localhost:3000/requests", json)
+			.then(data => {
+				console.log(data);
+				showModalThanks(textMessage.ok);
+				statusMessage.remove();
+			}).catch(() => {
+				showModalThanks(textMessage.fail);
+			}).finally(() => {
+				form.reset();
+			});
+		});
+	}
+
+	function showModalThanks(message){
+		let modalDialog = document.querySelector(".modal__dialog");
+		modalDialog.classList.add("hide");
+		modalDialog.classList.remove("show");
+
+		openModal();
+
+		let modalThanks = document.createElement("div");
+		modalThanks.classList.add("modal__dialog");
+		modalThanks.innerHTML = `
+			<div class="modal__content">
+				<div data-close class="modal__close">×</div>
+				<div class="modal__title">${message}</div>
+			</div>
+		`;
+		modalWindowContent.append(modalThanks);
+
+		setTimeout(() => {
+			modalDialog.classList.add("show");
+			modalDialog.classList.remove("hide");
+			modalThanks.remove();
+			closeModal();
+		}, 5000);
+	}
+
+// Sliders
+
+	const sliderItems = document.querySelectorAll(".offer__slide"),
+				sliderPrev= document.querySelector(".offer__slider-prev"),
+				sliderNext = document.querySelector(".offer__slider-next"),
+				sliderCurrentNum = document.querySelector("#current"),
+				sliderTotalNum = document.querySelector("#total");
+
+	let sliderIndex = 1;
+
+	function showSlider(n){
+		
+		if (n > sliderItems.length){
+			sliderIndex = 1;
 		}
+
+		if (n < 1){
+			sliderIndex = sliderItems.length;
+		}
+
+		sliderItems.forEach(item => item.style.display = "none");
+		sliderItems[sliderIndex - 1].style.display = "block";
+
+		if (sliderIndex < 10){
+			sliderCurrentNum.textContent = `0${sliderIndex}`;	
+		} else{
+			sliderCurrentNum.textContent = sliderIndex;
+		}		
+	}
+
+	function changeIndex(n){
+		showSlider(sliderIndex += n);
+	}
+
+	if (sliderItems.length < 10){
+		sliderTotalNum.textContent = `0${sliderItems.length}`;	
+	} else{
+		sliderTotalNum.textContent = sliderItems.length;
+	}
+	
+	showSlider(sliderIndex);
+
+	sliderNext.addEventListener("click", () => {
+		changeIndex(1);
+	});
+
+	sliderPrev.addEventListener("click", () => {
+		changeIndex(-1);
+	});
 
 });
