@@ -301,26 +301,39 @@ window.addEventListener("DOMContentLoaded", () => {
 				sliderTotalNum = document.querySelector("#total"),
 				sliderInner = document.querySelector(".offer__slider-inner"),
 				sliderWrap = document.querySelector(".offer__slider-wrapper"),
+				sliderContainerDots = document.querySelector(".container-dots"),
 				widthSliderWindow = window.getComputedStyle(sliderWrap).width;
 
 	let sliderIndex = 1,
 			offset = 0;
 
-	if (sliderItems.length < 10){
-		sliderTotalNum.textContent = `0${sliderItems.length}`;	
-	} else{
-		sliderTotalNum.textContent = sliderItems.length;
-	}
+	sliderItems.forEach(item => {
+		let dot = document.createElement("div");
+		dot.classList.add("dot");
+		sliderContainerDots.append(dot);
+	});
 
-	if (sliderIndex < 10){
-		sliderCurrentNum.textContent = `0${sliderIndex}`;	
-	} else{
-		sliderCurrentNum.textContent = sliderIndex;
-	}
+	const sliderDots = document.querySelectorAll(".dot");
+	sliderDots[sliderIndex - 1].style.opacity = 1;
+
+	sliderDots.forEach((item, index) => {
+		item.addEventListener("click", () => {
+			setSliderDot(index);
+			sliderIndex = index + 1;
+			offset = +widthSliderWindow.slice(0, widthSliderWindow.length - 2) * index;
+
+			sliderInner.style.transform = `translateX(-${offset}px)`;
+
+			setCheckedNumZero(sliderCurrentNum, sliderIndex);
+		});
+	});
+
+	setCheckedNumZero(sliderTotalNum, sliderItems.length);
+	setCheckedNumZero(sliderCurrentNum, sliderIndex);
 
 	sliderInner.style.width = 100 * sliderItems.length + "%";
 	sliderInner.style.display = "flex";
-	sliderInner.style.transition = "1s all";
+	sliderInner.style.transition = "0.5s all";
 	sliderWrap.style.overflow = "hidden";
 
 	sliderNext.addEventListener("click", () => {
@@ -334,11 +347,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
 		sliderInner.style.transform = `translateX(-${offset}px)`;
 
-		if (sliderIndex < 10){
-			sliderCurrentNum.textContent = `0${sliderIndex}`;	
-		} else{
-			sliderCurrentNum.textContent = sliderIndex;
-		}
+		setCheckedNumZero(sliderCurrentNum, sliderIndex);
+		setSliderDot(sliderIndex - 1);
 	});
 
 	sliderPrev.addEventListener("click", () => {
@@ -349,14 +359,24 @@ window.addEventListener("DOMContentLoaded", () => {
 			offset -= +widthSliderWindow.slice(0, widthSliderWindow.length - 2);
 			sliderIndex--;
 		}
-
 		sliderInner.style.transform = `translateX(-${offset}px)`;
 
-		if (sliderIndex < 10){
-			sliderCurrentNum.textContent = `0${sliderIndex}`;	
-		} else{
-			sliderCurrentNum.textContent = sliderIndex;
-		}
+		setCheckedNumZero(sliderCurrentNum, sliderIndex);
+		setSliderDot(sliderIndex - 1);
 	});
 
+	function setSliderDot(indexDot){
+		sliderDots.forEach(item => {
+			item.style.opacity = 0.5;
+		});
+		sliderDots[indexDot].style.opacity = 1;
+	}
+
+	function setCheckedNumZero(pos, num){
+		if (num < 10){
+			pos.textContent = `0${num}`;	
+		} else{
+			pos.textContent = num;
+		}
+	}
 });
