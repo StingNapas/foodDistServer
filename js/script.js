@@ -426,6 +426,11 @@ window.addEventListener("DOMContentLoaded", () => {
 		const elem = document.querySelector(selectorItem);
 
 		elem.addEventListener("input", () => {
+			if (elem.value.match(/\D/g)){
+				elem.style.border = "1px solid red";
+			} else {
+				elem.style.border = "none";
+			}
 			switch (elem.getAttribute("id")){
 				case "height":
 					height = +elem.value;
